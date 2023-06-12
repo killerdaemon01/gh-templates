@@ -55,5 +55,5 @@ jobs:
       
       - name: Docker Build and Push
         run: |
-          docker build . -t ${{inputs.REGISTRY_NAME}}.azurecr.io/nginx-docker-template:${{ github.sha }}
-          docker push ${{inputs.REGISTRY_NAME}}.azurecr.io/nginx-docker-template:${{ github.sha }}
+          docker build . -t ${{inputs.REGISTRY_NAME}}.azurecr.io/${{inputs.IMAGE_NAME}}:${{ github.sha }}
+          docker push ${{inputs.REGISTRY_NAME}}.azurecr.io/${{inputs.IMAGE_NAME}}:${{ github.sha }}
