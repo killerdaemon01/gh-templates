@@ -31,6 +31,9 @@ on:
       ACR_TOKEN:
         description: ACR Token
         required: true
+      AZURE_WEBAPP_PUBLISH_PROFILE:
+        description: Publish profile
+        required: true
 
 
 jobs: 
@@ -61,6 +64,7 @@ jobs:
         uses: azure/webapps-deploy@v2
         with:
             app-name: webapp29017
+            publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
             images: ${{inputs.REGISTRY_NAME}}.azurecr.io/${{inputs.IMAGE_NAME}}:${{ github.sha }}
       - name: Azure logout
         run: |
