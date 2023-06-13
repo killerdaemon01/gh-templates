@@ -57,3 +57,11 @@ jobs:
         run: |
           docker build . -t ${{inputs.REGISTRY_NAME}}.azurecr.io/${{inputs.IMAGE_NAME}}:${{ github.sha }}
           docker push ${{inputs.REGISTRY_NAME}}.azurecr.io/${{inputs.IMAGE_NAME}}:${{ github.sha }}
+      - name: Deploy to Webapp
+        uses: azure/webapps-deploy@v2
+        with:
+            app-name: webapp29017
+            images: ${{inputs.REGISTRY_NAME}}.azurecr.io/${{inputs.IMAGE_NAME}}:${{ github.sha }}
+      - name: Azure logout
+        run: |
+            az logout
