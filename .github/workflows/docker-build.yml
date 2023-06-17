@@ -51,11 +51,16 @@ jobs:
               id: keyvaultsecrets
               with:
                   inlineScript: |
+                    #Whitelist IP on Keyvault and ACR
+                    $ipAddress = Invoke-RestMethod -Uri "https://api.myip.com" | Select-Object -ExpandProperty ip
+                    Add-AzKeyVaultNetworkRule -VaultName mykeyvault29018 -IpAddressRange $ipaddress/32
+
                     $username = (Get-AzKeyVaultSecret -VaultName ${{inputs.keyvault}} -Name ${{inputs.acr_username_secret}} -AsPlainText)
                     Write-Output "username=$($username)" >> $Env:GITHUB_OUTPUT
 
                     $password = (Get-AzKeyVaultSecret -VaultName ${{inputs.keyvault}} -Name ${{inputs.acr_password_secret}} -AsPlainText)
                     Write-Output "password=$($password)" >> $Env:GITHUB_OUTPUT
+
                   azPSVersion: "latest"
 
 
