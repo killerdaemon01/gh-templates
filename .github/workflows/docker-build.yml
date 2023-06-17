@@ -1,0 +1,90 @@
+name: Docker build template
+on:
+    workflow_call:
+        inputs:
+            keyvault:
+                description: The keyvault name
+                required: true
+                type: string
+            acr_username_secret:
+                description: The secret name that has the ACR username
+                required: true
+                type: string
+            acr_password_secret:
+                description: The secret name that has the ACR password
+                required: true
+                type: string
+            acr_name:
+                description: The name of the Azure Container Registry
+                required: true
+                type: string
+            image_name:
+                description: The name of the image in the ACR
+                required: true
+                type: string
+            environment:
+                description: The environment this would be running for
+                required: true
+                type: string
+
+
+
+jobs:
+    docker-build-push:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+
+            - name: Az CLI login
+              uses: azure/login@v1
+              with:
+                client-id: ${{ secrets.AZURE_CLIENT_ID }}
+                tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+                subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+                enable-AzPSSession: true
+
+
+            - name: Get ACR Username and password from Keyvaults
+              uses: azure/powershell@v1
+              id: keyvaultsecrets
+              with:
+                  inlineScript: |
+                    $username = (Get-AzKeyVaultSecret -VaultName ${{inputs.keyvault}} -Name ${{inputs.acr_username_secret}} -AsPlainText)
+                    Write-Output "username=$($username)" >> $Env:GITHUB_OUTPUT
+
+                    $password = (Get-AzKeyVaultSecret -VaultName ${{inputs.keyvault}} -Name ${{inputs.acr_password_secret}} -AsPlainText)
+                    Write-Output "password=$($password)" >> $Env:GITHUB_OUTPUT
+                  azPSVersion: "latest"
+
+
+            - name: Azure Registry Login
+              uses: azure/docker-login@v1
+              with:
+                login-server: ${{inputs.acr_name}}.azurecr.io
+                username: ${{steps.keyvaultsecrets.outputs.username}}
+                password: ${{steps.keyvaultsecrets.outputs.password}}
+
+
+            - name: Docker build and push
+              run: |
+                docker build . -t ${{inputs.acr_name}}.azurecr.io/${{inputs.image_name}}:${{github.sha}}
+                docker push ${{inputs.acr_name}}.azurecr.io/${{inputs.image_name}}:${{github.sha}}
+
+
+            - name: Azure CLI script
+              uses: azure/CLI@v1
+              with:
+                inlineScript: |
+                    az postgres server list
+                    az logout
+                    az cache purge
+                    az account clear
+            
+
+
+#Checkout code
+#Authenticate with Azurelogin with powershell
+#Get ACR Username and password from KV
+#Do a build and push to ACR
