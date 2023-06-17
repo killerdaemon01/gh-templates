@@ -22,10 +22,10 @@ on:
                 description: The name of the image in the ACR
                 required: true
                 type: string
-            environment:
-                description: The environment this would be running for
-                required: true
-                type: string
+            # environment:
+            #     description: The environment this would be running for
+            #     required: true
+            #     type: string
 
 
 
