@@ -33,6 +33,7 @@ jobs:
     Deploy:
         environment: ${{inputs.environment}}
         runs-on: ubuntu-latest
+
         steps:
             - name: Az CLI login
               uses: azure/login@v1
@@ -41,6 +42,15 @@ jobs:
                 tenant-id: ${{ secrets.AZURE_TENANT_ID }}
                 subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
                 enable-AzPSSession: true
+
+            - name: Whitelist IP on Webapp
+              uses: azure/powershell@v1
+              with:
+                inlineScript: |
+                    $resourcegroup = $(Get-AzWebApp -Name ${{inputs.web_app_name}}).ResourceGroup
+                    $ipAddress = Invoke-RestMethod -Uri "https://api.myip.com" | Select-Object -ExpandProperty ip
+                    Add-AzWebAppAccessRestrictionRule -ResourceGroupName $resourcegroup -WebAppName ${{inputs.web_app_name}} -SlotName ${{inputs.slot_name}} -Priority 300 -Action Allow -Name GithubAction -IpAddress $ipAddress/32
+                azPSVersion: "latest"
 
             - name: Deploy to Webapp
               uses: azure/webapps-deploy@v2
@@ -60,6 +70,8 @@ jobs:
                 inlineScript: |
                     $resourcegroup = $(Get-AzWebApp -Name ${{inputs.web_app_name}}).ResourceGroup
                     Switch-AzWebAppSlot -SourceSlotName ${{inputs.slot_name}} -DestinationSlotName Production -ResourceGroupName $resourcegroup -Name ${{inputs.web_app_name}}
+
+                    Remove-AzWebAppAccessRestrictionRule -ResourceGroupName $resourcegroup -WebAppName ${{inputs.web_app_name}}) -Name GithubAction
   
                 azPSVersion: "latest"
               
