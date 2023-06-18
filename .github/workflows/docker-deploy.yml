@@ -71,7 +71,7 @@ jobs:
                     $resourcegroup = $(Get-AzWebApp -Name ${{inputs.web_app_name}}).ResourceGroup
                     Switch-AzWebAppSlot -SourceSlotName ${{inputs.slot_name}} -DestinationSlotName Production -ResourceGroupName $resourcegroup -Name ${{inputs.web_app_name}}
 
-                    Remove-AzWebAppAccessRestrictionRule -ResourceGroupName $resourcegroup -WebAppName ${{inputs.web_app_name}} -Name GithubAction
+                    Remove-AzWebAppAccessRestrictionRule -ResourceGroupName $resourcegroup -WebAppName ${{inputs.web_app_name}} -Name GithubAction -TargetScmSite
   
                 azPSVersion: "latest"
               
