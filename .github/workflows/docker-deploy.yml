@@ -18,6 +18,11 @@ on:
                 description: The tag for the image
                 required: true
                 type: string
+            slot_name:
+                description: The slot name where the app should be deployed
+                required: false
+                type: string
+                default: staging
 
 
 jobs:
@@ -30,6 +35,7 @@ jobs:
                 client-id: ${{ secrets.AZURE_CLIENT_ID }}
                 tenant-id: ${{ secrets.AZURE_TENANT_ID }}
                 subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+                enable-AzPSSession: true
 
             - name: Deploy to Webapp
               uses: azure/webapps-deploy@v2
@@ -37,7 +43,21 @@ jobs:
                 app-name: ${{inputs.web_app_name}}
                 publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
                 images: ${{inputs.acr_name}}.azurecr.io/${{inputs.image_name}}:${{ inputs.tag }}
-                slot-name: staging
+                slot-name: ${{inputs.slot_name}}
+
+            - name: Sleep
+              run: |
+                sleep 90
+            
+            - name: Swap Slots
+              uses: azure/powershell@v1
+              with:
+                inlineScript: |
+                    $resourcegroup = $(Get-AzWebApp -Name ${{inputs.web_app_name}}).ResourceGroup
+                    Switch-AzWebAppSlot -SourceSlotName ${{inputs.slot_name}} -DestinationSlotName Production -ResourceGroupName $resourcegroup -Name ${{inputs.web_app_name}}
+  
+                azPSVersion: "latest"
+              
 
             - name: Azure Logout
               uses: azure/CLI@v1
