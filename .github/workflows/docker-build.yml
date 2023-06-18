@@ -54,7 +54,7 @@ jobs:
                   inlineScript: |
                     #Whitelist IP on Keyvault and ACR
                     $ipAddress = Invoke-RestMethod -Uri "https://api.myip.com" | Select-Object -ExpandProperty ip
-                    Add-AzKeyVaultNetworkRule -VaultName mykeyvault29018 -IpAddressRange $ipaddress/32
+                    Add-AzKeyVaultNetworkRule -VaultName ${{inputs.keyvault}} -IpAddressRange $ipaddress/32
 
                     $username = (Get-AzKeyVaultSecret -VaultName ${{inputs.keyvault}} -Name ${{inputs.acr_username_secret}} -AsPlainText)
                     Write-Output "username=$($username)" >> $Env:GITHUB_OUTPUT
