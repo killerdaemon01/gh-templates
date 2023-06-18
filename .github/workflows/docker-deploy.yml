@@ -33,7 +33,8 @@ jobs:
                 app-name: ${{inputs.web_app_name}}
                 publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
                 images: ${{inputs.acr_name}}.azurecr.io/${{inputs.image_name}}:${{ github.sha }}
-
+                slot-name: staging
+                
             - name: Azure Logout
               uses: azure/CLI@v1
               with:
