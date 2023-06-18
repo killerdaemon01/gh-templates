@@ -26,6 +26,10 @@ on:
                 description: The environment this would be running for
                 required: true
                 type: string
+            tag:
+                description: The tag used for the image
+                required: true
+                type: string
 
 
 
@@ -75,22 +79,14 @@ jobs:
 
             - name: Docker build and push
               run: |
-                docker build . -t ${{inputs.acr_name}}.azurecr.io/${{inputs.image_name}}:${{github.sha}}
-                docker push ${{inputs.acr_name}}.azurecr.io/${{inputs.image_name}}:${{github.sha}}
+                docker build . -t ${{inputs.acr_name}}.azurecr.io/${{inputs.image_name}}:${{inputs.tag}}
+                docker push ${{inputs.acr_name}}.azurecr.io/${{inputs.image_name}}:${{inputs.tag}}
 
 
-            - name: Azure CLI script
+            - name: Azure Logout
               uses: azure/CLI@v1
               with:
                 inlineScript: |
-                    az postgres server list
                     az logout
                     az cache purge
                     az account clear
-            
-
-
-#Checkout code
-#Authenticate with Azurelogin with powershell
-#Get ACR Username and password from KV
-#Do a build and push to ACR
