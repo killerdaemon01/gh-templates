@@ -23,10 +23,15 @@ on:
                 required: false
                 type: string
                 default: staging
+            environment:
+                description: Environment this needs to be deployed on
+                required: true
+                type: string
 
 
 jobs:
     Deploy:
+        environment: ${{inputs.environment}}
         runs-on: ubuntu-latest
         steps:
             - name: Az CLI login
