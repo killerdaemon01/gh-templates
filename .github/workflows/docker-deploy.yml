@@ -49,7 +49,7 @@ jobs:
                 inlineScript: |
                     $resourcegroup = $(Get-AzWebApp -Name ${{inputs.web_app_name}}).ResourceGroup
                     $ipAddress = Invoke-RestMethod -Uri "https://api.myip.com" | Select-Object -ExpandProperty ip
-                    Add-AzWebAppAccessRestrictionRule -ResourceGroupName $resourcegroup -WebAppName ${{inputs.web_app_name}} -SlotName ${{inputs.slot_name}} -Priority 300 -Action Allow -Name GithubAction -IpAddress $ipAddress/32
+                    Add-AzWebAppAccessRestrictionRule -ResourceGroupName $resourcegroup -WebAppName ${{inputs.web_app_name}} -SlotName ${{inputs.slot_name}} -Priority 300 -Action Allow -Name GithubAction -IpAddress $ipAddress/32 -TargetScmSite
                 azPSVersion: "latest"
 
             - name: Deploy to Webapp
