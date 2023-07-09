@@ -27,6 +27,10 @@ on:
                 description: Environment this needs to be deployed on
                 required: true
                 type: string
+            app_settings:
+                description: App settings for the webapp
+                required: true
+                type: string
 
 
 jobs:
@@ -52,6 +56,14 @@ jobs:
                     Add-AzWebAppAccessRestrictionRule -ResourceGroupName $resourcegroup -WebAppName ${{inputs.web_app_name}} -SlotName ${{inputs.slot_name}} -Priority 300 -Action Allow -Name GithubAction -IpAddress $ipAddress/32 -TargetScmSite
                     Add-AzWebAppAccessRestrictionRule -ResourceGroupName $resourcegroup -WebAppName ${{inputs.web_app_name}} -SlotName ${{inputs.slot_name}} -Priority 300 -Action Allow -Name GithubAction -IpAddress $ipAddress/32
                 azPSVersion: "latest"
+
+            - name: Update App service settings
+              uses: azure/appservice-settings@v1
+              with:
+                app-name: ${{inputs.web_app_name}}
+                slot-name: ${{inputs.slot_name}}
+                app-settings-json: ${{ inputs.app_settings }}
+
 
             - name: Deploy to Webapp
               uses: azure/webapps-deploy@v2
